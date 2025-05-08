@@ -1,0 +1,20 @@
+# Entorno virtual
+venv/
+ENV/
+*.pyc
+__pycache__/
+db.sqlite3
+*.sqlite3
+*.log
+
+# Archivos del entorno de desarrollo
+*.vscode/
+.idea/
+
+# Archivos sensibles
+.env
+*.env
+
+# Archivos de migración (opcional si no quieres subirlos)
+*/migrations/__pycache__/
+*/migrations/*.py[cod]
