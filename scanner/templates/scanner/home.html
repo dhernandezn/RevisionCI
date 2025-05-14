@@ -29,11 +29,36 @@
                             {% endfor %}
                             <button type="submit" class="btn btn-primary">Validar</button>
                         </form>
+
                         {% if mensaje %}
                             <div class="alert alert-info mt-3">
                                 {{ mensaje }}
                             </div>
                         {% endif %}
+
+                        {% if resultado %}
+                            {% if resultado.error %}
+                                <div class="alert alert-danger mt-3">
+                                    Error: {{ resultado.error }}
+                                </div>
+                            {% else %}
+                                {% if es_pep %}
+                                    <div class="alert alert-warning mt-3">
+                                        ⚠️ <strong>La persona es PEP (Persona Políticamente Expuesta)</strong><br>
+                                        <ul class="mt-2">
+                                            {% for cargo in coincidencias %}
+                                                <li>{{ cargo }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                {% else %}
+                                    <div class="alert alert-success mt-3">
+                                        ✅ La persona no es PEP.
+                                    </div>
+                                {% endif %}
+                            {% endif %}
+                        {% endif %}
+
                     </div>
                 </div>
             </div>
