@@ -19,8 +19,10 @@ def home(request):
             mensaje = f"RUT recibido y válido: {rut}"
 
             #Consultamos a API Regcheq
-            resultado = consultar_rut_api(rut)
-
+            rut_sin_guion = modular_rut_api(rut)
+            print("RUT A REVISAR: ",rut_sin_guion)
+            resultado = consultar_rut_api(rut_sin_guion)
+            
             es_pep, coincidencias = evaluar_pep(resultado)
         else:
             mensaje = "RUT inválido."
@@ -36,9 +38,12 @@ def home(request):
     # 'es_prohibido': es_prohibido,
     # 'es_sospechoso': es_sospechoso,
         })
-
+def modular_rut_api(dni):
+    dni_api_reg = dni[:-2] + dni[-1]
+    print("EL RUT PARA LA API ES: ",dni_api_reg)
+    
 def consultar_rut_api(dni):
-    modular_rut_api(dni)
+    
     url = f"https://external-api.regcheq.com/record/{settings.API_KEY_REGCHEQ}"
     headers = {
         "Content-Type": "application/json",
@@ -83,6 +88,3 @@ def consultar_rut_api(dni):
         print(f"Error inesperado: {e}")
         return {"error": "Error desconocido"}
 # Create your views here.
-def modular_rut_api(dni):
-    dni_api_reg = dni[:-2] + dni[-1]
-    print("EL RUT PARA LA API ES: ",dni_api_reg)
