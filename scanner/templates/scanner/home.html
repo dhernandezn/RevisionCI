@@ -44,16 +44,16 @@
                             {% else %}
                                 {% if es_pep %}
                                     <div class="alert alert-warning mt-3">
-                                        ⚠️ <strong>La persona es PEP (Persona Políticamente Expuesta)</strong><br>
-                                        <ul class="mt-2">
-                                            {% for cargo in coincidencias %}
-                                                <li>{{ cargo }}</li>
-                                            {% endfor %}
-                                        </ul>
+                                        ⚠️ <strong>Cliente es PEP (Persona Políticamente Expuesta)</strong><br>
+                                            {% if cargo_pep %}
+                                                Cargo: {{ cargo_pep }}
+                                            {% else %}
+                                                Cargo no disponible.
+                                            {% endif %}
                                     </div>
                                 {% else %}
                                     <div class="alert alert-success mt-3">
-                                        ✅ La persona no es PEP.
+                                        ✅ Cliente no es PEP.
                                     </div>
                                 {% endif %}
                             {% endif %}

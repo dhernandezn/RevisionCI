@@ -11,6 +11,7 @@ def home(request):
     resultado = None
     es_pep = False
     coincidencias = []
+    cargo_pep = []
 
     if request.method == "POST":
         form = RutForm(request.POST)
@@ -20,27 +21,36 @@ def home(request):
 
             #Consultamos a API Regcheq
             rut_sin_guion = modular_rut_api(rut)
-            print("RUT A REVISAR: ",rut_sin_guion)
             resultado = consultar_rut_api(rut_sin_guion)
             
-            es_pep, coincidencias = evaluar_pep(resultado)
+            
+            #es_pep, coincidencias,cargo_pep = evaluar_pep(resultado)
+
+            es_pep, coincidencias, cargo_pep = evaluar_pep(resultado)
+
+            print("¿Es PEP?:", es_pep)
+            print("Coincidencias:", coincidencias)
+            print("Cargo PEP:", cargo_pep)
+
         else:
             mensaje = "RUT inválido."
     else:
         form = RutForm()
     return render(request, 'scanner/home.html',{
-       'form': form,
-    'mensaje': mensaje,
-    'resultado': resultado,
-    'es_pep': es_pep,
-    'coincidencias': coincidencias,
-    # 'es_autoexcluido': es_autoexcluido,
-    # 'es_prohibido': es_prohibido,
-    # 'es_sospechoso': es_sospechoso,
+        'form': form,
+        'mensaje': mensaje,
+        'resultado': resultado,
+        'es_pep': es_pep,
+        'coincidencias': coincidencias,
+        'cargo_pep': cargo_pep,
+        # 'es_autoexcluido': es_autoexcluido,
+        # 'es_prohibido': es_prohibido,
+        # 'es_sospechoso': es_sospechoso,
         })
 def modular_rut_api(dni):
     dni_api_reg = dni[:-2] + dni[-1]
-    print("EL RUT PARA LA API ES: ",dni_api_reg)
+    print("EL RUT PARA LA REGCHEQ ES: ",dni_api_reg)
+    return dni_api_reg
     
 def consultar_rut_api(dni):
     
@@ -87,4 +97,6 @@ def consultar_rut_api(dni):
     except Exception as e:
         print(f"Error inesperado: {e}")
         return {"error": "Error desconocido"}
+    
+
 # Create your views here.
