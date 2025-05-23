@@ -1,14 +1,17 @@
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+import logging.config
 
 load_dotenv()  # Carga las variables del .env
 
 API_KEY_REGCHEQ= os.getenv("API_KEY_REGCHEQ")  # Solo lectura desde .env
+TOKEN_API_SCJ= os.getenv("TOKEN_API_SCJ")
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 print(f"🔐 Clave cargada desde .env: {API_KEY_REGCHEQ}")
+print(f"🔐 Clave SCJ desde .env: {API_KEY_REGCHEQ}")
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
@@ -68,8 +71,15 @@ WSGI_APPLICATION = 'revision_ci.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'scanner_hn',
+        'USER': 'root',
+        'PASSWORD': 'Schelp..,',
+        'HOST': 'localhost',  # o IP de tu servidor de base de datos
+        'PORT': '3306',
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
+        }
     }
 }
 
@@ -117,3 +127,17 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 print("Ruta absoluta del .env:", BASE_DIR / '.env')
 print("Contenido del .env:", open(BASE_DIR / '.env').read())
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,  # Recomendado para no interferir con otros logs
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',  # Puedes usar DEBUG para más detalle
+    },
+}

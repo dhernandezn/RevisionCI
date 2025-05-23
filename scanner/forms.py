@@ -1,5 +1,6 @@
 from django import forms 
 import re
+from .models import Prohibidos
 
 class RutForm(forms.Form):
     rut = forms.CharField( label="RUT",
@@ -28,3 +29,12 @@ class RutForm(forms.Form):
         res = 11 - (s % 11)
         dv_calc = '0' if res == 11 else 'K' if res == 10 else str(res)
         return dv.upper() == dv_calc
+
+class ProhibidoForm(forms.ModelForm):
+    class Meta:
+        model = Prohibidos
+        fields = ['rut', 'nombre', 'fecha_inicio', 'fecha_fin']
+        widgets = {
+            'fecha_inicio': forms.DateInput(attrs={'type': 'date'}),
+            'fecha_fin': forms.DateInput(attrs={'type': 'date'}),
+        }

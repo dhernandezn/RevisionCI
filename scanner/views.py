@@ -1,17 +1,23 @@
-from django.shortcuts import render
-from django.http import HttpResponse
-from django.http import JsonResponse
-from .forms import RutForm
+from django.shortcuts import render, redirect, get_object_or_404
+from .forms import RutForm, ProhibidoForm
 from django.conf import settings
 import requests
-from .utils import evaluar_pep
+from .utils import evaluar_pep, actualizar_autoexcluidos
+from .models import Autoexcluidos, Prohibidos
+import logging
 
+logger = logging.getLogger(__name__)
+
+# Create your views here.
 def home(request):
     mensaje = None
-    resultado = None
+    resultado_pep = None
     es_pep = False
+    nivel = None
     coincidencias = []
     cargo_pep = []
+    resultado_scj = None
+    resultado_proh = None
 
     if request.method == "POST":
         form = RutForm(request.POST)
@@ -21,16 +27,19 @@ def home(request):
 
             #Consultamos a API Regcheq
             rut_sin_guion = modular_rut_api(rut)
-            resultado = consultar_rut_api(rut_sin_guion)
-            
-            
+            resultado_pep = consultar_rut_api(rut_sin_guion)
+            resultado_scj = Autoexcluidos.objects.filter(run=rut).exists()
+            resultado_proh = Prohibidos.objects.filter(rut=rut).exists()
             #es_pep, coincidencias,cargo_pep = evaluar_pep(resultado)
 
-            es_pep, coincidencias, cargo_pep = evaluar_pep(resultado)
+            es_pep, coincidencias, cargo_pep, nivel = evaluar_pep(resultado_pep)
 
             print("¿Es PEP?:", es_pep)
-            print("Coincidencias:", coincidencias)
-            print("Cargo PEP:", cargo_pep)
+            print("Cooincidencias:", coincidencias)
+            print("Cargo PEP: ", cargo_pep)
+            print("Nivel PEP: ", nivel)
+            print("Autoexcluido: ", resultado_scj)
+            print("prohibido: ", resultado_proh)
 
         else:
             mensaje = "RUT inválido."
@@ -39,10 +48,13 @@ def home(request):
     return render(request, 'scanner/home.html',{
         'form': form,
         'mensaje': mensaje,
-        'resultado': resultado,
+        'resultado': resultado_pep,
         'es_pep': es_pep,
         'coincidencias': coincidencias,
         'cargo_pep': cargo_pep,
+        'nivel_pep': nivel,
+        'autoexcluido': resultado_scj,
+        'prohibido': resultado_proh,
         # 'es_autoexcluido': es_autoexcluido,
         # 'es_prohibido': es_prohibido,
         # 'es_sospechoso': es_sospechoso,
@@ -98,5 +110,46 @@ def consultar_rut_api(dni):
         print(f"Error inesperado: {e}")
         return {"error": "Error desconocido"}
     
+autoexcluido, estado = actualizar_autoexcluidos(
+    api_url='https://autoexclusion.scj.gob.cl/api/v1/exclusions',
+    #bearer_token='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOjgyLCJpYXQiOjE1NjU1MjQzMzR9.yMFcpG4qjQsc65YHk21C5qt5h5vwAQ9SuyPuLlJ6FWE'
+    bearer_token=settings.TOKEN_API_SCJ
+)
 
-# Create your views here.
+if estado == 'creado':
+    print("Registro creado")
+elif estado == 'actualizado':
+    print("Registro Actualizado")
+elif estado == 'local':
+    print("Datos desde la BD Local")
+else:
+    print("No se pudo obtener el registro")
+
+def listar_prohibidos(request):
+    prohibidos = Prohibidos.objects.all()
+    return render(request, 'prohibidos/listar.html',{'prohibidos': prohibidos})
+
+def agregar_prohibido(request):
+    if request.method == 'POST':
+        form = ProhibidoForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('listar_prohibidos')
+    else:
+        form = ProhibidoForm()
+    return render(request, 'prohibidos/formulario.html', {'form': form})
+
+def editar_prohibido(request, pk):
+    prohibido = get_object_or_404(Prohibidos, pk=pk)
+    form = ProhibidoForm(request.POST or None, instance=prohibido)
+    if form.is_valid():
+        form.save()
+        return redirect('listar_prohibidos')
+    return render(request, 'prohibidos/formulario.html', {'form': form})
+
+def eliminar_prohibido(request, pk):
+    prohibido = get_object_or_404(Prohibidos, pk=pk)
+    if request.method == 'POST':
+        prohibido.delete()
+        return redirect('listar_prohibidos')
+    return render(request, 'prohibidos/confirmar_eliminar.html', {'prohibido': prohibido})

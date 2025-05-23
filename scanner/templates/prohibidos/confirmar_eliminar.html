@@ -1,0 +1,7 @@
+<h2>Eliminar Cliente Prohibido</h2>
+<p>¿Estás seguro que deseas eliminar a {{ prohibido.nombre }}?</p>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit">Sí, eliminar</button>
+    <a href="{% url 'listar_prohibidos' %}">Cancelar</a>
+</form>
