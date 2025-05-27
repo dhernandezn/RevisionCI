@@ -33,11 +33,11 @@
                     <tr class="hover:bg-gray-100">
                         <td class="px-6 py-4 whitespace-nowrap">{{ persona.rut }}</td>
                         <td class="px-6 py-4 whitespace-nowrap">{{ persona.nombre }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">{{ persona.motivo }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">{{ persona.fecha|date:"d/m/Y" }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">{{ persona.fecha_inicio|date:"d-m-Y"}}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">{{ persona.fecha_fin|date:"d-m-Y"}}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <a href="{% url 'prohibidos_editar' persona.id %}" class="text-indigo-600 hover:text-indigo-900 mr-4">Editar</a>
-                            <a href="{% url 'prohibidos_eliminar' persona.id %}" class="text-red-600 hover:text-red-800">Eliminar</a>
+                            <a href="{% url 'editar_prohibido' persona.id %}" class="text-indigo-600 hover:text-indigo-900 mr-4">Editar</a>
+                            <a href="{% url 'eliminar_prohibido' persona.id %}" class="text-red-600 hover:text-red-800">Eliminar</a>
                         </td>
                     </tr>
                     {% empty %}

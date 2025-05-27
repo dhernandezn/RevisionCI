@@ -25,27 +25,33 @@ def home(request):
             rut = form.cleaned_data['rut']
             mensaje = f"RUT recibido y válido: {rut}"
 
-            #Consultamos a API Regcheq
+            # Consultamos a API Regcheq
             rut_sin_guion = modular_rut_api(rut)
             resultado_pep = consultar_rut_api(rut_sin_guion)
+
+            # Consultamos a bases locales
             resultado_scj = Autoexcluidos.objects.filter(run=rut).exists()
             resultado_proh = Prohibidos.objects.filter(rut=rut).exists()
-            #es_pep, coincidencias,cargo_pep = evaluar_pep(resultado)
 
-            es_pep, coincidencias, cargo_pep, nivel = evaluar_pep(resultado_pep)
+            # Evaluar PEP solo si no hubo error
+            if "error" not in resultado_pep:
+                es_pep, coincidencias, cargo_pep, nivel = evaluar_pep(resultado_pep)
+            else:
+                logger.warning(f"Error en resultado_pep: {resultado_pep['error']}")
+                mensaje = f"Error al consultar PEP: {resultado_pep['error']}"
 
             print("¿Es PEP?:", es_pep)
-            print("Cooincidencias:", coincidencias)
-            print("Cargo PEP: ", cargo_pep)
-            print("Nivel PEP: ", nivel)
-            print("Autoexcluido: ", resultado_scj)
-            print("prohibido: ", resultado_proh)
-
+            print("Coincidencias:", coincidencias)
+            print("Cargo PEP:", cargo_pep)
+            print("Nivel PEP:", nivel)
+            print("Autoexcluido:", resultado_scj)
+            print("Prohibido:", resultado_proh)
         else:
             mensaje = "RUT inválido."
     else:
         form = RutForm()
-    return render(request, 'scanner/home.html',{
+
+    return render(request, 'scanner/home.html', {
         'form': form,
         'mensaje': mensaje,
         'resultado': resultado_pep,
@@ -55,13 +61,11 @@ def home(request):
         'nivel_pep': nivel,
         'autoexcluido': resultado_scj,
         'prohibido': resultado_proh,
-        # 'es_autoexcluido': es_autoexcluido,
-        # 'es_prohibido': es_prohibido,
-        # 'es_sospechoso': es_sospechoso,
-        })
+    })
+
 def modular_rut_api(dni):
     dni_api_reg = dni[:-2] + dni[-1]
-    print("EL RUT PARA LA REGCHEQ ES: ",dni_api_reg)
+    # print("EL RUT PARA LA REGCHEQ ES: ",dni_api_reg)
     return dni_api_reg
     
 def consultar_rut_api(dni):
@@ -75,11 +79,11 @@ def consultar_rut_api(dni):
         "dni": dni,
         "personType": "natural"
     }
-    print("🔑 API Key:", settings.API_KEY_REGCHEQ)
-    print("URL:", url)
-    print("Headers:", headers)
-    print("Data: ", data)
-    print(f"Intentando conectar a API con clave: {settings.API_KEY_REGCHEQ}")  # Log parcial de API key
+    # print("🔑 API Key:", settings.API_KEY_REGCHEQ)
+    # print("URL:", url)
+    # print("Headers:", headers)
+    # print("Data: ", data)
+    # print(f"Intentando conectar a API con clave: {settings.API_KEY_REGCHEQ}")  # Log parcial de API key
     
     try:
         response = requests.post(url, json=data, headers=headers, timeout=10)
@@ -127,7 +131,7 @@ else:
 
 def listar_prohibidos(request):
     prohibidos = Prohibidos.objects.all()
-    return render(request, 'prohibidos/listar.html',{'prohibidos': prohibidos})
+    return render(request, 'scanner/prohibidos/listar.html',{'prohibidos': prohibidos})
 
 def agregar_prohibido(request):
     if request.method == 'POST':
@@ -137,7 +141,7 @@ def agregar_prohibido(request):
             return redirect('listar_prohibidos')
     else:
         form = ProhibidoForm()
-    return render(request, 'prohibidos/formulario.html', {'form': form})
+    return render(request, 'scanner/prohibidos/formulario.html', {'form': form})
 
 def editar_prohibido(request, pk):
     prohibido = get_object_or_404(Prohibidos, pk=pk)
@@ -145,11 +149,11 @@ def editar_prohibido(request, pk):
     if form.is_valid():
         form.save()
         return redirect('listar_prohibidos')
-    return render(request, 'prohibidos/formulario.html', {'form': form})
+    return render(request, 'scanner/prohibidos/formulario.html', {'form': form})
 
 def eliminar_prohibido(request, pk):
     prohibido = get_object_or_404(Prohibidos, pk=pk)
     if request.method == 'POST':
         prohibido.delete()
         return redirect('listar_prohibidos')
-    return render(request, 'prohibidos/confirmar_eliminar.html', {'prohibido': prohibido})
+    return render(request, 'scanner/prohibidos/confirmar_eliminar.html', {'prohibido': prohibido})
