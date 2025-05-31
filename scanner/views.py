@@ -1,4 +1,6 @@
+from django.http import HttpResponseForbidden
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
 from .forms import RutForm, ProhibidoForm
 from django.conf import settings
 import requests
@@ -133,8 +135,13 @@ def listar_prohibidos(request):
     prohibidos = Prohibidos.objects.all()
     return render(request, 'scanner/prohibidos/listar.html',{'prohibidos': prohibidos})
 
+@login_required
 def agregar_prohibido(request):
+    if not request.user.is_staff:
+        return HttpResponseForbidden("No tienes permisos para agregar personas prohibidas.")
+
     if request.method == 'POST':
+        print("asdasddsadas")
         form = ProhibidoForm(request.POST)
         if form.is_valid():
             form.save()
@@ -144,11 +151,19 @@ def agregar_prohibido(request):
     return render(request, 'scanner/prohibidos/formulario.html', {'form': form})
 
 def editar_prohibido(request, pk):
+    if not request.user.is_staff:
+        return HttpResponseForbidden("No tienes permisos para acceder a esta página.")
+
     prohibido = get_object_or_404(Prohibidos, pk=pk)
-    form = ProhibidoForm(request.POST or None, instance=prohibido)
-    if form.is_valid():
-        form.save()
-        return redirect('listar_prohibidos')
+
+    if request.method == 'POST':
+        form = ProhibidoForm(request.POST or None, instance=prohibido)
+        if form.is_valid():
+            form.save()
+            return redirect('listar_prohibidos')
+    else:
+        form = ProhibidoForm(instance=prohibido)
+
     return render(request, 'scanner/prohibidos/formulario.html', {'form': form})
 
 def eliminar_prohibido(request, pk):

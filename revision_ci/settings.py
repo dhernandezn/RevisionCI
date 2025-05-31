@@ -10,8 +10,8 @@ TOKEN_API_SCJ= os.getenv("TOKEN_API_SCJ")
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-print(f"🔐 Clave cargada desde .env: {API_KEY_REGCHEQ}")
-print(f"🔐 Clave SCJ desde .env: {API_KEY_REGCHEQ}")
+# print(f"🔐 Clave cargada desde .env: {API_KEY_REGCHEQ}")
+# print(f"🔐 Clave SCJ desde .env: {API_KEY_REGCHEQ}")
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
@@ -125,8 +125,8 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-print("Ruta absoluta del .env:", BASE_DIR / '.env')
-print("Contenido del .env:", open(BASE_DIR / '.env').read())
+# print("Ruta absoluta del .env:", BASE_DIR / '.env')
+# print("Contenido del .env:", open(BASE_DIR / '.env').read())
 
 LOGGING = {
     'version': 1,

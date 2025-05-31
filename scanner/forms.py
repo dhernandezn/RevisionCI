@@ -35,6 +35,8 @@ class ProhibidoForm(forms.ModelForm):
         model = Prohibidos
         fields = ['rut', 'nombre', 'fecha_inicio', 'fecha_fin']
         widgets = {
-            'fecha_inicio': forms.DateInput(attrs={'type': 'date'}),
-            'fecha_fin': forms.DateInput(attrs={'type': 'date'}),
+            'rut': forms.TextInput(attrs={'class': 'w-full border border-gray-300 rounded px-3 py-2'}),
+            'nombre': forms.TextInput(attrs={'class': 'w-full border border-gray-300 rounded px-3 py-2'}),
+            'fecha_inicio': forms.DateInput(attrs={'class': 'w-full border border-gray-300 rounded px-3 py-2', 'type': 'date'}),
+            'fecha_fin': forms.DateInput(attrs={'class': 'w-full border border-gray-300 rounded px-3 py-2', 'type': 'date'}),
         }
